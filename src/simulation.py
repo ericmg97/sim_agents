@@ -8,8 +8,3 @@ class Simulation():
     
     def start(self):
         pass 
-
-    
-    def shuffle(self):
-        pass
-        

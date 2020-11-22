@@ -1,12 +1,13 @@
 from random import randint
 from agent import Bot
 from place import Place
+from child import Child
+from utils import is_in
 class Environment():
     def __init__(self, N, M, per_obs, per_dirt, cant_childs):
-        self.environment = [[Place(i,j) for i in range(M)] for j in range(N)]
+        self.environment = [[Place(i, j) for j in range(M)] for i in range(N)]
         
         self.dirty = 0
-        self.ok = True
 
         self.available = self._check_available_pos()
         
@@ -18,12 +19,22 @@ class Environment():
         self._fill_env(N, M, per_obs, 3)
         self._fill_env(N, M, per_dirt, 4)
 
+    def __str__(self):
+        str_out = ""
+        for row in self.environment:
+            for place in row:    
+                str_out += f"{place.objects} "
+            
+            str_out += "\n"
+        
+        return str_out
+
     def _create_corral(self, N, M, cant):
         row = randint(0, N - 1)
         col = randint(0, M - cant - 1)    
 
         for i in range(cant):
-            self.add_object(row, col + i, 5)
+            self.environment[row][col + i].add_object(5)
             self.available.remove((row, col + i))
   
     def _create_childs(self, cant):
@@ -31,11 +42,13 @@ class Environment():
         for _ in range(cant):
             if len(self.available):
                 i = randint(0, len(self.available) - 1)
-                self.add_object(*self.available[i], 2)
-                childs.append(self.available[i])
+                row = self.available[i][0]
+                col = self.available[i][1]
+                self.environment[row][col].add_object(2)
+
+                childs.append(Child(row, col))
                 self.available.pop(i)
             else:
-                self.ok = False
                 break
         else:
             return childs
@@ -44,7 +57,7 @@ class Environment():
         i = randint(0, len(self.available) - 1)
         position = self.available[i]
         
-        self.add_object(*position, 1)
+        self.environment[position[0]][position[1]].add_object(1)
         self.available.pop(i)
         
         return Bot(*position)
@@ -58,10 +71,11 @@ class Environment():
         for _ in range(cant_obj):
             if len(self.available):
                 i = randint(0, len(self.available) - 1)
-                self.add_object(*self.available[i], obj_type)
+                row = self.available[i][0]
+                col = self.available[i][1]
+                self.environment[row][col].add_object(obj_type)
                 self.available.pop(i)
             else:
-                self.ok = False
                 break
 
     def _check_available_pos(self):
@@ -73,27 +87,17 @@ class Environment():
 
         return available
 
-    def get_place(self, row, col):
-        try:
-            return self.environment[row][col]
-        except:
-            return None
-
-    def add_object(self, row, col, obj_type):
-        place = self.get_place(row, col)
-
-        if place is None:
-            return False
-        else:
-            self.environment[row][col].add_object(obj_type)
-            return True
-    
     def natural_change(self):
-        pass
+        for child in self.childs:
+            print(self)
+            if not child.taked:
+                self.environment = child.move(self.environment)
 
     def shuffle(self):
         pass
 
 if __name__ == "__main__":
+    
     a = Environment(5,8,20,10,3)
-    print("sad") 
+    a.natural_change()
+    print(f"\n{a}")

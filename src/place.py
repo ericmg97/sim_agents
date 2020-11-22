@@ -16,7 +16,7 @@ class Place():
     def move(self, env, new_r, new_c, objs):
         for obj in objs:
             env[new_r][new_c].add_object(obj)
-            env[self.row][self.column].del_obj(obj)
+            env[self.row][self.column].del_object(obj)
 
         return env
     
