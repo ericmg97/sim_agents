@@ -1,8 +1,8 @@
 from random import randint
 from agent import Bot
-from place import Place
 from child import Child
 from utils import is_in
+
 class Environment():
     def __init__(self, N, M, per_obs, per_dirt, cant_childs):
         self.environment = [[Place(i, j) for j in range(M)] for i in range(N)]
@@ -95,6 +95,28 @@ class Environment():
 
     def shuffle(self):
         pass
+
+class Place():
+    def __init__(self, row, col, objs = []):
+        self.objects = objs[:]
+        self.row = row
+        self.column = col
+    
+    def add_object(self, obj):
+        self.objects.append(obj)
+
+    def del_object(self, obj):
+        self.objects.remove(obj)
+
+    def clear(self, env):
+        self.objects = []
+
+    def move(self, env, new_r, new_c, objs):
+        for obj in objs:
+            env[new_r][new_c].add_object(obj)
+            env[self.row][self.column].del_object(obj)
+
+        return env
 
 if __name__ == "__main__":
     
