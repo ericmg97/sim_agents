@@ -6,6 +6,7 @@ class Child():
         self.row = row
         self.column = col
         self.taked = False
+        self.corral = False
 
     def move(self, env):
         place = env[self.row][self.column]
@@ -17,7 +18,7 @@ class Child():
         i = randint(0, len(movs) - 1)
         new_row = self.row + movs[i][0]
         new_col = self.column + movs[i][1]
-        print( f"\n{self.row} {self.column} -----> {new_row} {new_col}\n")
+        #print( f"\n{self.row} {self.column} -----> {new_row} {new_col}\n")
         new_place = env[new_row][new_col]
 
         if len(new_place.objects):
@@ -84,5 +85,5 @@ class Child():
         i = randint(0, len(movs) - 1)
         dirt_mov = movs[i]
         env[row + dirt_mov[0]][column + dirt_mov[1]].add_object(4)
-        print(f"Trash -> {row + dirt_mov[0]}, {column + dirt_mov[1]}")
+        #print(f"Trash -> {row + dirt_mov[0]}, {column + dirt_mov[1]}")
         return env, True

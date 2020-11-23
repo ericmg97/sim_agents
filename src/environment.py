@@ -13,7 +13,8 @@ class Environment():
         
         self._create_corral(cant_childs)
         
-        self.childs = self._create_childs(cant_childs)    
+        self.childs = self._create_childs(cant_childs)
+        self.childs_ok = [False for i in range(cant_childs)]
         self.agent = self._create_agent()
 
         self._fill_env(N, M, per_obs, 3)
@@ -91,7 +92,7 @@ class Environment():
     def natural_change(self):
         for child in self.childs:
             print(self)
-            if not child.taked:
+            if not child.taked and not child.corral:
                 self.environment, put_trash = child.move(self.environment)
                 if put_trash:
                     self.dirty += 1
@@ -173,7 +174,6 @@ class Place():
         return temp_env
 
 if __name__ == "__main__":
-    
     a = Environment(5,8,20,10,3)
     print(a.dirty)
     a.natural_change()
