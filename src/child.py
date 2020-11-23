@@ -12,7 +12,7 @@ class Child():
         movs = self._check_dir(env)
         
         if not len(movs):
-            return env
+            return env, False
 
         i = randint(0, len(movs) - 1)
         new_row = self.row + movs[i][0]
@@ -27,12 +27,13 @@ class Child():
                 if not len(obs_place.objects):
                     env = new_place.move(env, self.row + movs[i][0]*j, self.column + movs[i][1]*j, [3])
                     break
+                j += 1
         
         move_env = place.move(env, new_row, new_col, [2])
-        new_env = self._put_trash(move_env, self.row, self.column)
+        new_env, can_put = self._put_trash(move_env, self.row, self.column)
         self.row = new_row
         self.column = new_col
-        return new_env
+        return new_env, can_put
 
 
     def _check_dir(self,env):
@@ -76,9 +77,12 @@ class Child():
 
             else:
                 movs.remove(mov)
-       
+        
+        if not len(movs):
+            return env, False
+
         i = randint(0, len(movs) - 1)
         dirt_mov = movs[i]
         env[row + dirt_mov[0]][column + dirt_mov[1]].add_object(4)
         print(f"Trash -> {row + dirt_mov[0]}, {column + dirt_mov[1]}")
-        return env
+        return env, True

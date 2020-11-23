@@ -8,10 +8,10 @@ class Environment():
         self.environment = [[Place(i, j) for j in range(M)] for i in range(N)]
         
         self.dirty = 0
-
-        self.available = self._check_available_pos()
+        self.rows = N
+        self.columns = M
         
-        self._create_corral(N, M, cant_childs)
+        self._create_corral(cant_childs)
         
         self.childs = self._create_childs(cant_childs)    
         self.agent = self._create_agent()
@@ -29,52 +29,53 @@ class Environment():
         
         return str_out
 
-    def _create_corral(self, N, M, cant):
-        row = randint(0, N - 1)
-        col = randint(0, M - cant - 1)    
+    def _create_corral(self, cant):
+        row = randint(0, self.rows - 1)
+        col = randint(0, self.columns - cant - 1)    
 
         for i in range(cant):
             self.environment[row][col + i].add_object(5)
-            self.available.remove((row, col + i))
   
     def _create_childs(self, cant):
+        available = self._check_available_pos()
         childs = []
         for _ in range(cant):
-            if len(self.available):
-                i = randint(0, len(self.available) - 1)
-                row = self.available[i][0]
-                col = self.available[i][1]
+            if len(available):
+                i = randint(0, len(available) - 1)
+                row = available[i][0]
+                col = available[i][1]
                 self.environment[row][col].add_object(2)
-
+                
                 childs.append(Child(row, col))
-                self.available.pop(i)
+                available.pop(i)
             else:
                 break
         else:
             return childs
 
     def _create_agent(self):
-        i = randint(0, len(self.available) - 1)
-        position = self.available[i]
+        available = self._check_available_pos()
+        i = randint(0, len(available) - 1)
+        position = available[i]
         
         self.environment[position[0]][position[1]].add_object(1)
-        self.available.pop(i)
         
         return Bot(*position)
 
     def _fill_env(self, N, M, per_obj, obj_type):
         cant_obj = int(N*M*per_obj/100)
-        
+        available = self._check_available_pos()
+
         if obj_type == 4:
             self.dirty = cant_obj
 
         for _ in range(cant_obj):
-            if len(self.available):
-                i = randint(0, len(self.available) - 1)
-                row = self.available[i][0]
-                col = self.available[i][1]
+            if len(available):
+                i = randint(0, len(available) - 1)
+                row = available[i][0]
+                col = available[i][1]
                 self.environment[row][col].add_object(obj_type)
-                self.available.pop(i)
+                available.pop(i)
             else:
                 break
 
@@ -91,10 +92,47 @@ class Environment():
         for child in self.childs:
             print(self)
             if not child.taked:
-                self.environment = child.move(self.environment)
+                self.environment, put_trash = child.move(self.environment)
+                if put_trash:
+                    self.dirty += 1
 
     def shuffle(self):
-        pass
+        row_corral = randint(0, self.rows - 1)
+        col_corral = randint(0, self.columns - len(self.childs) - 1)
+        put_corral = 0
+
+        available = self._check_available_pos()
+        ok = [[False for j in range(self.columns)] for i in range(self.rows)]
+
+        for i in range(self.rows):
+            for j in range(self.columns):
+                place = self.environment[i][j]
+                if len(place.objects) and not ok[i][j]:
+                    if place.objects[0] != 5:
+                        k = randint(0, len(available) - 1)
+                        swap_place = available[k]
+                        available.pop(k)
+                        available.append((i, j))
+                        ok[swap_place[0]][swap_place[1]] = True
+                        self.environment = self.environment[i][j].swap(self.environment, swap_place[0], swap_place[1])
+                    elif place.objects[0] == 5:
+                        try:                 
+                            if self.environment[row_corral][col_corral + put_corral].objects[0] == 5:
+                                put_corral += 1
+                                j -= 1
+                                ok[row_corral][col_corral + put_corral] = True
+                                continue
+                        except:
+                            pass
+                        
+                        self.environment = self.environment[i][j].swap(self.environment, row_corral, col_corral + put_corral)
+                        ok[row_corral][col_corral + put_corral] = True
+                        #print(f"swap ({i}, {j}) -> ({row_corral}, {col_corral + put_corral})")
+                        
+                        if (row_corral, col_corral + put_corral) in available:
+                            available.remove((row_corral, col_corral + put_corral))
+
+                        put_corral += 1 
 
 class Place():
     def __init__(self, row, col, objs = []):
@@ -117,9 +155,30 @@ class Place():
             env[self.row][self.column].del_object(obj)
 
         return env
+    
+    def replace(self, env, new_r, new_c):
+        env[new_r][new_c] = Place(new_r, new_c)
+        return self.move(env, new_r, new_c, self.objects)
+
+    def swap(self, env, new_r, new_c):
+        if new_r == self.row and new_c == self.column:
+            return env
+
+        temp = env[new_r][new_c]
+        temp_env = self.replace(env, new_r, new_c)
+        
+        for obj in temp.objects:
+            self.add_object(obj)
+
+        return temp_env
 
 if __name__ == "__main__":
     
     a = Environment(5,8,20,10,3)
+    print(a.dirty)
     a.natural_change()
-    print(f"\n{a}")
+    a.natural_change()
+
+    a.shuffle()
+    print(a)
+    print(a.dirty)
