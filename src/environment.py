@@ -91,7 +91,6 @@ class Environment():
 
     def natural_change(self):
         for child in self.childs:
-            print(self)
             if not child.taked and not child.corral:
                 self.environment, put_trash = child.move(self.environment)
                 if put_trash:
@@ -109,13 +108,20 @@ class Environment():
             for j in range(self.columns):
                 place = self.environment[i][j]
                 if len(place.objects) and not ok[i][j]:
-                    if place.objects[0] != 5:
+                    if place.objects[0] != 5 and len(available):
                         k = randint(0, len(available) - 1)
                         swap_place = available[k]
                         available.pop(k)
                         available.append((i, j))
                         ok[swap_place[0]][swap_place[1]] = True
+                        if 2 in place.objects:
+                            for c in range(len(self.childs)):
+                                if self.childs[c].row == i and self.childs[c].column == j:
+                                    self.childs[c].row = swap_place[0]
+                                    self.childs[c].column = swap_place[1]
+
                         self.environment = self.environment[i][j].swap(self.environment, swap_place[0], swap_place[1])
+                        
                     elif place.objects[0] == 5:
                         try:                 
                             if self.environment[row_corral][col_corral + put_corral].objects[0] == 5:
@@ -126,9 +132,15 @@ class Environment():
                         except:
                             pass
                         
-                        self.environment = self.environment[i][j].swap(self.environment, row_corral, col_corral + put_corral)
                         ok[row_corral][col_corral + put_corral] = True
                         #print(f"swap ({i}, {j}) -> ({row_corral}, {col_corral + put_corral})")
+                        if 2 in self.environment[row_corral][col_corral + put_corral].objects:
+                            for c in range(len(self.childs)):
+                                if self.childs[c].row == row_corral and self.childs[c].column == col_corral + put_corral:
+                                    self.childs[c].row = i
+                                    self.childs[c].column = j
+
+                        self.environment = self.environment[i][j].swap(self.environment, row_corral, col_corral + put_corral)
                         
                         if (row_corral, col_corral + put_corral) in available:
                             available.remove((row_corral, col_corral + put_corral))
@@ -162,23 +174,10 @@ class Place():
         return self.move(env, new_r, new_c, self.objects)
 
     def swap(self, env, new_r, new_c):
-        if new_r == self.row and new_c == self.column:
-            return env
-
-        temp = env[new_r][new_c]
+        temp_objs = env[new_r][new_c].objects
         temp_env = self.replace(env, new_r, new_c)
         
-        for obj in temp.objects:
+        for obj in temp_objs:
             self.add_object(obj)
 
         return temp_env
-
-if __name__ == "__main__":
-    a = Environment(5,8,20,10,3)
-    print(a.dirty)
-    a.natural_change()
-    a.natural_change()
-
-    a.shuffle()
-    print(a)
-    print(a.dirty)

@@ -36,7 +36,6 @@ class Child():
         self.column = new_col
         return new_env, can_put
 
-
     def _check_dir(self,env):
         movs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
 
@@ -64,7 +63,6 @@ class Child():
                 movs.remove(mov)
        
         return movs
-
 
     def _put_trash(self, env, row, column):
         movs = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (0, 0)]
