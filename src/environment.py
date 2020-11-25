@@ -4,7 +4,7 @@ from child import Child
 from utils import is_in
 
 class Environment():
-    def __init__(self, N, M, per_obs, per_dirt, cant_childs):
+    def __init__(self, N, M, per_obs, per_dirt, cant_childs, agent_type):
         self.environment = [[Place(i, j) for j in range(M)] for i in range(N)]
         
         self.dirty = 0
@@ -15,7 +15,7 @@ class Environment():
         
         self.childs = self._create_childs(cant_childs)
         self.childs_ok = [False for i in range(cant_childs)]
-        self.agent = self._create_agent()
+        self.agent = self._create_agent(agent_type)
 
         self._fill_env(N, M, per_obs, 3)
         self._fill_env(N, M, per_dirt, 4)
@@ -54,14 +54,14 @@ class Environment():
         else:
             return childs
 
-    def _create_agent(self):
+    def _create_agent(self, agent_type):
         available = self._check_available_pos()
         i = randint(0, len(available) - 1)
         position = available[i]
         
         self.environment[position[0]][position[1]].add_object(1)
         
-        return Bot(*position)
+        return Bot(*position, agent_type)
 
     def _fill_env(self, N, M, per_obj, obj_type):
         cant_obj = int(N*M*per_obj/100)
@@ -108,13 +108,17 @@ class Environment():
             for j in range(self.columns):
                 place = self.environment[i][j]
                 if len(place.objects) and not ok[i][j]:
-                    if place.objects[0] != 5 and len(available):
+                    if 5 not in place.objects and len(available):
                         k = randint(0, len(available) - 1)
                         swap_place = available[k]
                         available.pop(k)
                         available.append((i, j))
                         ok[swap_place[0]][swap_place[1]] = True
-                        if 2 in place.objects:
+                        
+                        if 1 in place.objects:
+                            self.agent.row = swap_place[0]
+                            self.agent.column = swap_place[1]
+                        elif 2 in place.objects:
                             for c in range(len(self.childs)):
                                 if self.childs[c].row == i and self.childs[c].column == j:
                                     self.childs[c].row = swap_place[0]
@@ -122,31 +126,43 @@ class Environment():
 
                         self.environment = self.environment[i][j].swap(self.environment, swap_place[0], swap_place[1])
                         
-                    elif place.objects[0] == 5:
-                        try:                 
-                            if self.environment[row_corral][col_corral + put_corral].objects[0] == 5:
-                                put_corral += 1
-                                j -= 1
-                                ok[row_corral][col_corral + put_corral] = True
-                                continue
-                        except:
-                            pass
+                    elif 5 in place.objects:
+                        if 5 in self.environment[row_corral][col_corral + put_corral].objects:
+                            put_corral += 1
+                            j -= 1
+                            ok[row_corral][col_corral + put_corral] = True
+                            continue
                         
                         ok[row_corral][col_corral + put_corral] = True
-                        #print(f"swap ({i}, {j}) -> ({row_corral}, {col_corral + put_corral})")
-                        if 2 in self.environment[row_corral][col_corral + put_corral].objects:
+                        
+                        if 1 in place.objects:
+                            self.agent.row = row_corral
+                            self.agent.column = col_corral + put_corral
+                        elif 2 in place.objects:
+                            for c in range(len(self.childs)):
+                                if self.childs[c].row == i and self.childs[c].column == j:
+                                    self.childs[c].row = row_corral
+                                    self.childs[c].column = col_corral + put_corral
+
+                        if 1 in self.environment[row_corral][col_corral + put_corral].objects:
+                            self.agent.row = i
+                            self.agent.column = j
+                        elif 2 in self.environment[row_corral][col_corral + put_corral].objects:
                             for c in range(len(self.childs)):
                                 if self.childs[c].row == row_corral and self.childs[c].column == col_corral + put_corral:
                                     self.childs[c].row = i
                                     self.childs[c].column = j
 
                         self.environment = self.environment[i][j].swap(self.environment, row_corral, col_corral + put_corral)
-                        
+
                         if (row_corral, col_corral + put_corral) in available:
                             available.remove((row_corral, col_corral + put_corral))
 
                         put_corral += 1 
 
+    def move_agent(self):
+        print(self)
+        return self.agent.move(self.environment)
 class Place():
     def __init__(self, row, col, objs = []):
         self.objects = objs[:]
@@ -171,7 +187,7 @@ class Place():
     
     def replace(self, env, new_r, new_c):
         env[new_r][new_c] = Place(new_r, new_c)
-        return self.move(env, new_r, new_c, self.objects)
+        return self.move(env, new_r, new_c, self.objects[:])
 
     def swap(self, env, new_r, new_c):
         temp_objs = env[new_r][new_c].objects

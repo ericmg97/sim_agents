@@ -12,7 +12,7 @@ class Simulation():
         for t in range(1, 100*self.refresh_time):
             self.time = t
             
-            self.environment.agent.move()
+            self.environment.move_agent()
             
             self.environment.natural_change()
 

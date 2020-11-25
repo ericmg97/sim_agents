@@ -18,7 +18,6 @@ class Child():
         i = randint(0, len(movs) - 1)
         new_row = self.row + movs[i][0]
         new_col = self.column + movs[i][1]
-        #print( f"\n{self.row} {self.column} -----> {new_row} {new_col}\n")
         new_place = env[new_row][new_col]
 
         if len(new_place.objects):
@@ -44,12 +43,12 @@ class Child():
                 place = env[self.row + mov[0]][self.column + mov[1]]
 
                 if len(place.objects):                    
-                    if place.objects[0] == 3:
+                    if 3 in place.objects:
                         j = 2
                         while True:
                             if is_in(self.row + mov[0]*j, self.column + mov[1]*j, env):
                                 objects = env[self.row + mov[0]*j][self.column + mov[1]*j].objects
-                                if len(objects) and objects[0] == 3:
+                                if len(objects) and 3 in objects:
                                     j += 1
                                     continue
                                 elif not len(objects):
@@ -83,5 +82,4 @@ class Child():
         i = randint(0, len(movs) - 1)
         dirt_mov = movs[i]
         env[row + dirt_mov[0]][column + dirt_mov[1]].add_object(4)
-        #print(f"Trash -> {row + dirt_mov[0]}, {column + dirt_mov[1]}")
         return env, True
