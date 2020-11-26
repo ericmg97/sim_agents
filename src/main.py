@@ -14,7 +14,7 @@ def create_simulations(cant, agent_type):
     simulations = {}
     for _ in range(cant):
         env, params = create_environment(agent_type)
-        ref_time = randint(3, 40)
+        ref_time = randint(3, 15)
 
         simulations[params] = Simulation(env, ref_time)
     
@@ -22,11 +22,8 @@ def create_simulations(cant, agent_type):
 
 
 if __name__ == "__main__":
-    # test = create_simulations(1, "Trash")
-    # for item in test.items():
-    #     outp = item[1].execute()
-
     #Agent Type: Trash Goal or Children Goal
+    #Brute or Smart
     sims = create_simulations(10, "Brute")
     results = {}
     for sim in sims.items():
