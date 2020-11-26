@@ -3,11 +3,11 @@ from environment import Environment
 from simulation import Simulation
 
 def create_environment(agent_type):
-    N = randint(5, 10)
-    M = randint(5, 10)
+    N = randint(5, 7)
+    M = randint(5, 7)
     per_obs = randint(1, 20)
     per_dirty = randint(1, 20)
-    cant_childs = randint(1, M - 4)
+    cant_childs = randint(1, M - 3)
     return Environment(N, M, per_obs, per_dirty, cant_childs, agent_type), (N, M, per_obs, per_dirty, cant_childs)
 
 def create_simulations(cant, agent_type):
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     #     outp = item[1].execute()
 
     #Agent Type: Trash Goal or Children Goal
-    sims = create_simulations(10, "Trash")
+    sims = create_simulations(10, "Brute")
     results = {}
     for sim in sims.items():
         params = sim[0]
@@ -44,6 +44,18 @@ if __name__ == "__main__":
 
             simulation.reset()
 
-        results[params] = (int(trash/30),*reason.items())
+        results[params] = [int(trash/30),*reason.items()]
+        print(f"Done -> {params}")
     
-    print("aa")
+    for result in results.items():
+        params = result[0]
+        outp = result[1]
+        print("\n________________________________________________\n\n")
+        print(f"Cantidad de Filas: {params[0]}\nCantidad de Columnas: {params[1]}\nObstaculos(%): {params[2]}%\nSuciedad(%): {params[3]}%\nCantidad de Niños: {params[4]}\n\n")
+        print(f"% de Suciedad Promedio: {outp[0]}%")
+        outp.pop(0)
+        for o in outp:
+            reason = o[0]
+            times = o[1]
+            print(f"{reason} -> {times} veces")
+            

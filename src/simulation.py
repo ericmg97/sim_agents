@@ -23,15 +23,15 @@ class Simulation():
             self.dirty_cant += self.environment.dirty
 
             if self.environment.dirty/(self.environment.rows*self.environment.columns) >= 0.6:
-                return self.check_results("Fired")
+                return self.check_results("Despedido")
             elif self.environment.dirty == 0:
                 for child in self.environment.childs:
                     if not child.corral:
                         break
                 else:
-                    return self.check_results("Clean")
+                    return self.check_results("Todo Limpio")
             
-        return self.check_results("Time")
+        return self.check_results("Tiempo Agotado")
 
     def reset(self):
         self.environment = deepcopy(self._original_env)

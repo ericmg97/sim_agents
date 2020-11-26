@@ -4,53 +4,125 @@ class Bot():
     def __init__(self, row, col, agent_type):
         self.row = row
         self.column = col
+        self.have_child = False
         self.agent_type = agent_type
 
-    def move(self, env):
+    def move(self, env, childs):
         if self.agent_type == "Brute":
             return self._move_brute(env)
         elif self.agent_type == "Smart":
-            return self._move_smart(env)
+            return self._move_smart(env, childs)
 
     def _move_brute(self, env):
         place = env[self.row][self.column]
 
         if 4 in place.objects:
             place.del_object(4)
-            return env
+            return env, True
         
-        path_to_closest = self._check_closest_object(4, env, 4)
+        path_to_closest = self._path_to_closest_object(env, 4)
         
         if path_to_closest is None:
-            return env
+            return env, False
         else:
             next_move = path_to_closest[1]
 
             self.row = next_move[0]
             self.column = next_move[1]
             
-            return place.move(env,self.row, self.column, [1])
+            return place.move(env,self.row, self.column, [1]), False
 
-    def _move_smart(self, env):
-        pass
+    def _move_smart(self, env, childs):
+        place = env[self.row][self.column]
 
-    def _check_closest_object(self, moves, env, obj):
-        if moves == 8:
-            movs = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (0, 0)]
-        elif moves == 4:
-            movs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        if 4 in place.objects:
+            place.del_object(4)
+            return env, True
+
+        elif 5 in place.objects and self.have_child:
+            self.have_child = False
+
+            for i in range(len(childs)):
+                if childs[i].row == self.row and childs[i].column == self.column:
+                    childs[i].taked = False
+                    childs[i].corral = True
+                    break
+                
+            return env, False
+
+        #busca un niño si no tiene ninguno cargado
+        if not self.have_child:
+            path = self._path_to_closest_object(env, 2)
+            
+            #todos los niños estan en el corral, empieza a buscar basura
+            if path is None:
+                path = self._path_to_closest_object(env, 4)
+
+                if path is None:
+                    return env, False
+                
+                next_move = path[1]
+
+                self.row = next_move[0]
+                self.column = next_move[1]
+
+                return place.move(env, self.row, self.column, [1]), False
+            
+            #quedan niños sueltos por el ambiente
+            else:
+                next_move = path[1]
+
+                self.row = next_move[0]
+                self.column = next_move[1]
+                
+                if 2 in env[self.row][self.column].objects:
+                    self.have_child = True
+
+                    for i in range(len(childs)):
+                        if childs[i].row == self.row and childs[i].column == self.column:
+                            childs[i].taked = True
+                            break
+
+                return place.move(env, self.row, self.column, [1]), False
+     
+        #busca un corral vacio para dejar el niño q carga
+        else:
+            path = self._path_to_closest_object(env, 5)
+            
+            if path is None:
+                return env, False
+            
+            first_move = path[1]
+            if 4 in env[first_move[0]][first_move[1]].objects or 5 in env[first_move[0]][first_move[1]].objects:
+                next_move = path[1]
+            else:
+                next_move = path[2]
+
+            for i in range(len(childs)):
+                if childs[i].row == self.row and childs[i].column == self.column:
+                    childs[i].row = next_move[0]
+                    childs[i].column = next_move[1]
+                    break
+
+            self.row = next_move[0]
+            self.column = next_move[1]
+            
+            return place.move(env, self.row, self.column, place.objects[:]), False
+
+    def _path_to_closest_object(self, env, obj):      
+        if self.have_child:
+            checked = [[True if 3 in env[i][j].objects or 2 in env[i][j].objects else False for j in range(len(env[0]))] for i in range(len(env))]
+        else:
+            checked = [[True if 3 in env[i][j].objects else False for j in range(len(env[0]))] for i in range(len(env))]
         
-        return self._path_to_closest(movs, env, obj)
-
-    def _path_to_closest(self, moves, env, obj):   
-        checked = [[True if 3 in env[i][j].objects else False for j in range(len(env[0]))] for i in range(len(env))]
+        moves = [(-1, 0), (0, 1), (1, 0), (0, -1)] 
         cola = [[(self.row, self.column)]]
 
         while cola:
             path = cola.pop(0)          
             row, col = path[-1]
 
-            if obj in env[row][col].objects:
+            if len(env[row][col].objects) and env[row][col].objects[0] == obj:
                 return path
             
             for direct in moves:          

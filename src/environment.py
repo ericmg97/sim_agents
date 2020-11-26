@@ -118,11 +118,12 @@ class Environment():
                         if 1 in place.objects:
                             self.agent.row = swap_place[0]
                             self.agent.column = swap_place[1]
-                        elif 2 in place.objects:
+                        if 2 in place.objects:
                             for c in range(len(self.childs)):
                                 if self.childs[c].row == i and self.childs[c].column == j:
                                     self.childs[c].row = swap_place[0]
                                     self.childs[c].column = swap_place[1]
+                                    break
 
                         self.environment = self.environment[i][j].swap(self.environment, swap_place[0], swap_place[1])
                         
@@ -138,20 +139,22 @@ class Environment():
                         if 1 in place.objects:
                             self.agent.row = row_corral
                             self.agent.column = col_corral + put_corral
-                        elif 2 in place.objects:
+                        if 2 in place.objects:
                             for c in range(len(self.childs)):
                                 if self.childs[c].row == i and self.childs[c].column == j:
                                     self.childs[c].row = row_corral
                                     self.childs[c].column = col_corral + put_corral
+                                    break
 
                         if 1 in self.environment[row_corral][col_corral + put_corral].objects:
                             self.agent.row = i
                             self.agent.column = j
-                        elif 2 in self.environment[row_corral][col_corral + put_corral].objects:
+                        if 2 in self.environment[row_corral][col_corral + put_corral].objects:
                             for c in range(len(self.childs)):
                                 if self.childs[c].row == row_corral and self.childs[c].column == col_corral + put_corral:
                                     self.childs[c].row = i
                                     self.childs[c].column = j
+                                    break
 
                         self.environment = self.environment[i][j].swap(self.environment, row_corral, col_corral + put_corral)
 
@@ -161,8 +164,9 @@ class Environment():
                         put_corral += 1 
 
     def move_agent(self):
-        print(self)
-        return self.agent.move(self.environment)
+        self.environment, del_trash = self.agent.move(self.environment, self.childs)
+        if del_trash:
+            self.dirty -= 1
 class Place():
     def __init__(self, row, col, objs = []):
         self.objects = objs[:]
