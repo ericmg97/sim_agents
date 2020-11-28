@@ -1,4 +1,4 @@
-from random import randint
+from random import choice, randint
 from utils import is_in
 
 class Child():
@@ -15,22 +15,28 @@ class Child():
         if not len(movs):
             return env, False
 
-        i = randint(0, len(movs) - 1)
-        new_row = self.row + movs[i][0]
-        new_col = self.column + movs[i][1]
+        mov = choice(movs)
+        new_row = self.row + mov[0]
+        new_col = self.column + mov[1]
         new_place = env[new_row][new_col]
 
         if len(new_place.objects):
             j = 2
             while True:
-                obs_place = env[self.row + movs[i][0]*j][self.column + movs[i][1]*j]
+                obs_place = env[self.row + mov[0]*j][self.column + mov[1]*j]
                 if not len(obs_place.objects):
-                    env = new_place.move(env, self.row + movs[i][0]*j, self.column + movs[i][1]*j, [3])
+                    env = new_place.move(env, self.row + mov[0]*j, self.column + mov[1]*j, [3])
                     break
                 j += 1
         
         move_env = place.move(env, new_row, new_col, [2])
-        new_env, can_put = self._put_trash(move_env, self.row, self.column)
+        
+        trash = randint(0, 1)
+        if trash:
+            new_env, can_put = self._put_trash(move_env, self.row, self.column)
+        else:
+            new_env, can_put = env, False
+
         self.row = new_row
         self.column = new_col
         return new_env, can_put
@@ -79,7 +85,7 @@ class Child():
         if not len(movs):
             return env, False
 
-        i = randint(0, len(movs) - 1)
-        dirt_mov = movs[i]
+        dirt_mov = choice(movs)
+        
         env[row + dirt_mov[0]][column + dirt_mov[1]].add_object(4)
         return env, True

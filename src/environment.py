@@ -1,4 +1,4 @@
-from random import randint
+from random import choice, randint
 from agent import Bot
 from child import Child
 from utils import is_in
@@ -42,13 +42,13 @@ class Environment():
         childs = []
         for _ in range(cant):
             if len(available):
-                i = randint(0, len(available) - 1)
-                row = available[i][0]
-                col = available[i][1]
+                place = choice(available)
+                row = place[0]
+                col = place[1]
                 self.environment[row][col].add_object(2)
                 
                 childs.append(Child(row, col))
-                available.pop(i)
+                available.remove(place)
             else:
                 break
         else:
@@ -56,8 +56,7 @@ class Environment():
 
     def _create_agent(self, agent_type):
         available = self._check_available_pos()
-        i = randint(0, len(available) - 1)
-        position = available[i]
+        position = choice(available)
         
         self.environment[position[0]][position[1]].add_object(1)
         
@@ -72,11 +71,11 @@ class Environment():
 
         for _ in range(cant_obj):
             if len(available):
-                i = randint(0, len(available) - 1)
-                row = available[i][0]
-                col = available[i][1]
+                place = choice(available)
+                row = place[0]
+                col = place[1]
                 self.environment[row][col].add_object(obj_type)
-                available.pop(i)
+                available.remove(place)
             else:
                 break
 
@@ -108,10 +107,9 @@ class Environment():
             for j in range(self.columns):
                 place = self.environment[i][j]
                 if len(place.objects) and not ok[i][j]:
-                    if 5 not in place.objects and len(available):
-                        k = randint(0, len(available) - 1)
-                        swap_place = available[k]
-                        available.pop(k)
+                    if 5 not in place.objects and len(available):                     
+                        swap_place = choice(available)
+                        available.remove(swap_place)
                         available.append((i, j))
                         ok[swap_place[0]][swap_place[1]] = True
                         

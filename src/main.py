@@ -3,10 +3,10 @@ from environment import Environment
 from simulation import Simulation
 
 def create_environment(agent_type):
-    N = randint(5, 7)
-    M = randint(5, 7)
-    per_obs = randint(1, 20)
-    per_dirty = randint(1, 20)
+    N = randint(5, 10)
+    M = randint(5, 10)
+    per_obs = randint(10, 30)
+    per_dirty = randint(10, 20)
     cant_childs = randint(1, M - 3)
     return Environment(N, M, per_obs, per_dirty, cant_childs, agent_type), (N, M, per_obs, per_dirty, cant_childs)
 
@@ -14,7 +14,7 @@ def create_simulations(cant, agent_type):
     simulations = {}
     for _ in range(cant):
         env, params = create_environment(agent_type)
-        ref_time = randint(3, 15)
+        ref_time = randint(5, 8)
 
         simulations[params] = Simulation(env, ref_time)
     

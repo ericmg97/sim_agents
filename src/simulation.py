@@ -39,4 +39,7 @@ class Simulation():
         self.dirty_cant = self.environment.dirty
 
     def check_results(self, reason):
-        return int(self.dirty_cant/self.time), reason
+        dirty_places_ave = self.dirty_cant / self.time
+        area = self.environment.rows * self.environment.columns
+        
+        return int(((dirty_places_ave)*100)/(area)), reason
