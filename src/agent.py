@@ -1,16 +1,15 @@
 from utils import is_in
 
 class Bot():
-    def __init__(self, row, col, agent_type):
+    def __init__(self, row, col):
         self.row = row
         self.column = col
         self.have_child = False
-        self.agent_type = agent_type
 
-    def move(self, env, childs):
-        if self.agent_type == "Brute":
+    def move(self, env, childs, agent_type = "Smart"):
+        if agent_type == "Brute":
             return self._move_brute(env, childs)
-        elif self.agent_type == "Smart":
+        elif agent_type == "Smart":
             return self._move_smart(env, childs)
 
     def _move_brute(self, env, childs):

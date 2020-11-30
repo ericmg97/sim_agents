@@ -4,7 +4,7 @@ from child import Child
 from utils import is_in
 
 class Environment():
-    def __init__(self, N, M, per_obs, per_dirt, cant_childs, agent_type):
+    def __init__(self, N, M, per_obs, per_dirt, cant_childs):
         self.environment = [[Place(i, j) for j in range(M)] for i in range(N)]
         
         self.dirty = 0
@@ -15,7 +15,7 @@ class Environment():
         
         self.childs = self._create_childs(cant_childs)
         self.childs_ok = [False for i in range(cant_childs)]
-        self.agent = self._create_agent(agent_type)
+        self.agent = self._create_agent()
 
         self._fill_env(N, M, per_obs, 3)
         self._fill_env(N, M, per_dirt, 4)
@@ -54,13 +54,13 @@ class Environment():
         else:
             return childs
 
-    def _create_agent(self, agent_type):
+    def _create_agent(self):
         available = self._check_available_pos()
         position = choice(available)
         
         self.environment[position[0]][position[1]].add_object(1)
         
-        return Bot(*position, agent_type)
+        return Bot(*position)
 
     def _fill_env(self, N, M, per_obj, obj_type):
         cant_obj = int(N*M*per_obj/100)
@@ -161,8 +161,8 @@ class Environment():
 
                         put_corral += 1 
 
-    def move_agent(self):
-        self.environment, del_trash = self.agent.move(self.environment, self.childs)
+    def move_agent(self, agent_type):
+        self.environment, del_trash = self.agent.move(self.environment, self.childs, agent_type)
         if del_trash:
             self.dirty -= 1
 class Place():
