@@ -8,11 +8,11 @@ class Simulation():
         self.refresh_time = refresh_time
         self.dirty_cant = environment.dirty
     
-    def execute(self):
+    def execute(self, agent_type):
         for t in range(1, 100*self.refresh_time):
             self.time = t
             
-            self.environment.move_agent()
+            self.environment.move_agent(agent_type)
             
             self.environment.natural_change()
 
